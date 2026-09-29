@@ -1,0 +1,853 @@
+openapi: 3.1.0
+info:
+  title: Instant Quote Service (quote-extui-service)
+  description: |-
+    Instant Quote backend: form defaults, master data, city and zip code suggestions, and quote submission.
+
+    Every code field holds an md_codedetail.cdcode exactly as /api/v1/masterdata/codes returned it, for example TPMA and not AIR. Codes are case sensitive. Build the dropdowns from that endpoint rather than hardcoding values.
+  version: v1
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: ProfileData
+  description: Values the quote form starts with
+- name: MasterData
+  description: Master data used to fill in a quote request
+- name: Places
+  description: City and zip code suggestions
+- name: Health
+  description: Service liveness
+- name: QuoteRequests
+  description: Submitting a quote request
+paths:
+  /api/v1/quote-requests:
+    post:
+      tags:
+      - QuoteRequests
+      summary: Submit a quote request
+      description: |-
+        Writes the request, its line items and its accessorial services in one transaction.
+
+        Code fields take a cdcode, for example TPMA rather than AIR. qrref and status are set by the service. Line numbers come from the order of the lineItems array, so any lineNo sent is ignored. pickupType or deliveryType PDTDO makes the matching address line 1, city and country required.
+
+        Both examples below are valid as they are.
+      operationId: submit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuoteRequestPayload"
+            examples:
+              Full:
+                description: "Door to port, two line items, three accessorial services."
+                value:
+                  mode: TPMA
+                  cargoType: CGTPNP
+                  ratingType: RTTPU
+                  pickupType: PDTDO
+                  originPortCode: ORD
+                  pickupAddress1: 100 N Riverside Plaza
+                  pickupAddress2: Suite 1200
+                  pickupCity: Chicago
+                  pickupState: IL
+                  pickupPostalCode: "60606"
+                  pickupCountryCode: US
+                  deliveryType: PDTPO
+                  destinationPortCode: TPE
+                  deliveryCountryCode: TW
+                  weightUom: WUMKG
+                  dimensionUom: DUMCM
+                  totalGrossWeight: 480.5
+                  totalGrossWeightUom: WUMKG
+                  totalVolume: 3.2
+                  totalVolumeUom: VUMCBM
+                  totalVolumeWeight: 534.4
+                  totalVolumeWeightUom: WUMKG
+                  totalChargeableWeight: 534.4
+                  totalChargeableWeightUom: WUMKG
+                  cargoReadyDate: 2026-09-20T00:00:00
+                  cargoReadyTz: GMT
+                  cargoReadyTzStd: Etc/GMT
+                  requiredDeliveryDate: 2026-09-27T00:00:00
+                  requiredDeliveryTz: GMT
+                  requiredDeliveryTzStd: Etc/GMT
+                  fullName: Balaram Reddy
+                  companyName: Acme Imports LLC
+                  isCommercialCustomer: true
+                  email: balaram@example.com
+                  isConsentEmail: true
+                  phone: +1-312-555-0199
+                  jobTitle: Logistics Manager
+                  address: "100 N Riverside Plaza, Chicago, IL 60606"
+                  countryCode: US
+                  lineItems:
+                  - commodity: Electronic components
+                    quantity: 20
+                    packageType: PKTBOX
+                    grossWeight: 300.0
+                    grossWeightUom: WUMKG
+                    volume: 1.9
+                    volumeUom: VUMCBM
+                    volumeWeight: 317.3
+                    volumeWeightUom: WUMKG
+                    chargeableWeight: 317.3
+                    chargeableWeightUom: WUMKG
+                    length: 120.0
+                    width: 80.0
+                    height: 100.0
+                    dimensionUom: DUMCM
+                    isStackable: true
+                    isHazmat: false
+                  - commodity: Cables and adapters
+                    quantity: 10
+                    packageType: PKTCRT
+                    grossWeight: 180.5
+                    grossWeightUom: WUMKG
+                    length: 110.0
+                    width: 75.0
+                    height: 95.0
+                    dimensionUom: DUMCM
+                  accessorialServices:
+                  - ACSOCC
+                  - ACSDCC
+                  - ACSINS
+              Minimal:
+                description: Only the required fields.
+                value:
+                  mode: TPMA
+                  cargoType: CGTPNP
+                  ratingType: RTTPU
+                  pickupType: PDTPO
+                  originPortCode: ORD
+                  deliveryType: PDTPO
+                  destinationPortCode: TPE
+                  weightUom: WUMKG
+                  dimensionUom: DUMCM
+                  fullName: Balaram Reddy
+                  companyName: Acme Imports LLC
+                  isCommercialCustomer: true
+                  email: balaram@example.com
+                  isConsentEmail: true
+                  lineItems:
+                  - commodity: Electronic components
+                    quantity: 20
+        required: true
+      responses:
+        "201":
+          description: Stored. Show qrref to the user.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuoteRequestCreated"
+        "400":
+          description: "One or more fields were rejected. Every problem is listed\
+            \ in errors, so the whole form can be corrected in one go."
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Unexpected failure. The body never carries internal detail.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /ping:
+    get:
+      tags:
+      - Health
+      summary: Report that the service is alive. Does not check the database.
+      operationId: ping
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PingResponse"
+        "500":
+          description: Unexpected failure. The body never carries internal detail.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /api/v1/profiledata/defaults:
+    get:
+      tags:
+      - ProfileData
+      summary: Values the quote form starts with
+      description: "Every field except version is a cdcode, and each one matches a\
+        \ field name on the quote request body, so the response can be copied into\
+        \ the form state as it is. No parameters."
+      operationId: defaults
+      responses:
+        "200":
+          description: The current defaults.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuoteDefaults"
+        "500":
+          description: Unexpected failure. The body never carries internal detail.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /api/v1/places/suggestions:
+    get:
+      tags:
+      - Places
+      summary: Suggest cities and zip codes as the user types
+      description: "Calls Amazon Location Service (Places API v2 Autocomplete). Returns\
+        \ at most 8 suggestions, cities and zip codes only."
+      operationId: suggest
+      parameters:
+      - name: query
+        in: query
+        description: What the user typed. 2 to 100 characters.
+        required: true
+        schema:
+          type: string
+        example: Chicago
+      - name: countryCode
+        in: query
+        description: Restrict to one ISO country. Case insensitive.
+        required: false
+        schema:
+          type: string
+        example: US
+      responses:
+        "200":
+          description: "Suggestions, best match first."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ListResponsePlaceSuggestion"
+        "400":
+          description: A parameter broke a rule.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Amazon Location Service failed or the API key is not set.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Unexpected failure. The body never carries internal detail.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /api/v1/masterdata/countries:
+    get:
+      tags:
+      - MasterData
+      summary: List every active country
+      description: "Ordered by name, 233 rows today so no paging. region is the UN\
+        \ M49 region such as Asia, not a KWE sales region. No parameters."
+      operationId: listCountries
+      responses:
+        "200":
+          description: The active country list.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ListResponseCountry"
+        "500":
+          description: Unexpected failure. The body never carries internal detail.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /api/v1/masterdata/codes:
+    get:
+      tags:
+      - MasterData
+      summary: List code categories and their active values
+      description: "Build every dropdown from this; several categories come back per\
+        \ call. A category that does not exist is left out rather than returning 404,\
+        \ so compare what you asked for against what came back to catch a typo. A\
+        \ category with no active value returns an empty codes array."
+      operationId: listCodes
+      parameters:
+      - name: cmcode
+        in: query
+        description: "Code category to return, for example CGT. Repeatable, and a\
+          \ single value may hold a comma separated list, so cmcode=CGT,PKT&cmcode=TPM\
+          \ works. Omit entirely to get every active category. Each token must match\
+          \ ^[A-Z0-9]{1,3}$ and at most 20 distinct categories are accepted."
+        schema:
+          type: string
+        example: "CGT,PKT"
+      responses:
+        "200":
+          description: Categories sorted by cmcode.
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ListResponseCodeMaster"
+        "400":
+          description: "A cmcode broke the pattern, or more than 20 were requested."
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Unexpected failure. The body never carries internal detail.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /api/v1/masterdata/airports:
+    get:
+      tags:
+      - MasterData
+      summary: "Search airports by IATA code, city or name"
+      description: "Best match first: exact IATA code, then IATA prefix, then city\
+        \ prefix. Equal matches come back largest airport first. About 9,000 airports\
+        \ are loaded, all with an IATA code."
+      operationId: searchAirports
+      parameters:
+      - name: query
+        in: query
+        description: "Free text. At least 2 characters, at most 60. Letters, digits,\
+          \ spaces, apostrophes, hyphens and periods only. Matches the IATA code,\
+          \ the city and the airport name, case insensitive. Omit for no text filter."
+        required: false
+        schema:
+          type: string
+        example: chi
+      - name: countryCode
+        in: query
+        description: Restrict to one ISO country. Case insensitive.
+        required: false
+        schema:
+          type: string
+        example: US
+      - name: limit
+        in: query
+        description: "Maximum rows. Defaults to 20, maximum 100."
+        required: false
+        schema:
+          type: integer
+          format: int32
+        example: 20
+      responses:
+        "200":
+          description: "Matching airports, best match first."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ListResponseAirport"
+        "400":
+          description: "A parameter broke a rule, for example a one character query."
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Unexpected failure. The body never carries internal detail.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+components:
+  schemas:
+    QuoteRequestLineItem:
+      type: object
+      properties:
+        commodity:
+          type: string
+          maxLength: 256
+          minLength: 0
+        quantity:
+          type: number
+          exclusiveMinimum: 0
+        packageType:
+          type: string
+          maxLength: 20
+          minLength: 0
+        grossWeight:
+          type: number
+          minimum: 0
+        grossWeightUom:
+          type: string
+          maxLength: 20
+          minLength: 0
+        volume:
+          type: number
+          minimum: 0
+        volumeUom:
+          type: string
+          maxLength: 20
+          minLength: 0
+        volumeWeight:
+          type: number
+          minimum: 0
+        volumeWeightUom:
+          type: string
+          maxLength: 20
+          minLength: 0
+        chargeableWeight:
+          type: number
+          minimum: 0
+        chargeableWeightUom:
+          type: string
+          maxLength: 20
+          minLength: 0
+        length:
+          type: number
+          minimum: 0
+        width:
+          type: number
+          minimum: 0
+        height:
+          type: number
+          minimum: 0
+        dimensionUom:
+          type: string
+          maxLength: 20
+          minLength: 0
+        isStackable:
+          type: boolean
+        isHazmat:
+          type: boolean
+      required:
+      - commodity
+      - quantity
+    QuoteRequestPayload:
+      type: object
+      properties:
+        mode:
+          type: string
+          maxLength: 20
+          minLength: 0
+        cargoType:
+          type: string
+          maxLength: 20
+          minLength: 0
+        ratingType:
+          type: string
+          maxLength: 20
+          minLength: 0
+        pickupType:
+          type: string
+          maxLength: 20
+          minLength: 0
+        originPortCode:
+          type: string
+          maxLength: 3
+          minLength: 0
+        pickupAddress1:
+          type: string
+          maxLength: 200
+          minLength: 0
+        pickupAddress2:
+          type: string
+          maxLength: 200
+          minLength: 0
+        pickupCity:
+          type: string
+          maxLength: 100
+          minLength: 0
+        pickupState:
+          type: string
+          maxLength: 100
+          minLength: 0
+        pickupPostalCode:
+          type: string
+          maxLength: 20
+          minLength: 0
+        pickupCountryCode:
+          type: string
+          maxLength: 3
+          minLength: 0
+        deliveryType:
+          type: string
+          maxLength: 20
+          minLength: 0
+        destinationPortCode:
+          type: string
+          maxLength: 3
+          minLength: 0
+        deliveryAddress1:
+          type: string
+          maxLength: 200
+          minLength: 0
+        deliveryAddress2:
+          type: string
+          maxLength: 200
+          minLength: 0
+        deliveryCity:
+          type: string
+          maxLength: 100
+          minLength: 0
+        deliveryState:
+          type: string
+          maxLength: 100
+          minLength: 0
+        deliveryPostalCode:
+          type: string
+          maxLength: 20
+          minLength: 0
+        deliveryCountryCode:
+          type: string
+          maxLength: 3
+          minLength: 0
+        weightUom:
+          type: string
+          maxLength: 20
+          minLength: 0
+        dimensionUom:
+          type: string
+          maxLength: 20
+          minLength: 0
+        totalGrossWeight:
+          type: number
+          minimum: 0
+        totalGrossWeightUom:
+          type: string
+          maxLength: 20
+          minLength: 0
+        totalVolume:
+          type: number
+          minimum: 0
+        totalVolumeUom:
+          type: string
+          maxLength: 20
+          minLength: 0
+        totalVolumeWeight:
+          type: number
+          minimum: 0
+        totalVolumeWeightUom:
+          type: string
+          maxLength: 20
+          minLength: 0
+        totalChargeableWeight:
+          type: number
+          minimum: 0
+        totalChargeableWeightUom:
+          type: string
+          maxLength: 20
+          minLength: 0
+        cargoReadyDate:
+          type: string
+          format: date-time
+        cargoReadyTz:
+          type: string
+          maxLength: 5
+          minLength: 0
+        cargoReadyTzStd:
+          type: string
+          maxLength: 50
+          minLength: 0
+        requiredDeliveryDate:
+          type: string
+          format: date-time
+        requiredDeliveryTz:
+          type: string
+          maxLength: 5
+          minLength: 0
+        requiredDeliveryTzStd:
+          type: string
+          maxLength: 50
+          minLength: 0
+        fullName:
+          type: string
+          maxLength: 120
+          minLength: 0
+        companyName:
+          type: string
+          maxLength: 200
+          minLength: 0
+        isCommercialCustomer:
+          type: boolean
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          minLength: 0
+        isConsentEmail:
+          type: boolean
+        phone:
+          type: string
+          maxLength: 40
+          minLength: 0
+        jobTitle:
+          type: string
+          maxLength: 100
+          minLength: 0
+        address:
+          type: string
+          maxLength: 200
+          minLength: 0
+        countryCode:
+          type: string
+          maxLength: 3
+          minLength: 0
+        lineItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuoteRequestLineItem"
+          maxItems: 200
+          minItems: 1
+        accessorialServices:
+          type: array
+          items:
+            type: string
+            maxLength: 20
+            minLength: 0
+          maxItems: 50
+          minItems: 0
+      required:
+      - cargoType
+      - companyName
+      - deliveryType
+      - destinationPortCode
+      - dimensionUom
+      - email
+      - fullName
+      - isCommercialCustomer
+      - isConsentEmail
+      - lineItems
+      - mode
+      - originPortCode
+      - pickupType
+      - ratingType
+      - weightUom
+    ApiError:
+      type: object
+      description: RFC 9457 problem detail. Field level failures add errors.
+      properties:
+        type:
+          type: string
+          example: about:blank
+        title:
+          type: string
+          example: Bad Request
+        status:
+          type: integer
+          format: int32
+          example: 400
+        detail:
+          type: string
+          example: The request body has 2 validation error(s).
+        instance:
+          type: string
+          example: /api/v1/quote-requests
+        errors:
+          type: array
+          description: One entry per rejected field. Absent when no field was at fault.
+          items:
+            $ref: "#/components/schemas/ApiFieldError"
+    ApiFieldError:
+      type: object
+      properties:
+        field:
+          type: string
+          example: "lineItems[0].packageType"
+        message:
+          type: string
+          example: '''BOX'' is not an active code. Expected a cdcode from category
+            PKT.'
+    QuoteRequestCreated:
+      type: object
+      properties:
+        qrid:
+          type: integer
+          format: int64
+          description: Primary key of the stored request.
+          example: 1045
+        qrref:
+          type: string
+          description: Business reference to show the user.
+          example: QR-2026-001045
+        status:
+          type: string
+          description: Always RQSNEW on create. Its label comes from category RQS.
+          example: RQSNEW
+    PingResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    QuoteDefaults:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int32
+          description: Goes up whenever a value below changes. Compare it to decide
+            whether a cached copy is stale.
+          example: 1
+        mode:
+          type: string
+          description: Category TPM.
+          example: TPMA
+        cargoType:
+          type: string
+          description: Category CGT.
+          example: CGTPNP
+        ratingType:
+          type: string
+          description: Category RTT.
+          example: RTTPU
+        pickupType:
+          type: string
+          description: Category PDT.
+          example: PDTPO
+        deliveryType:
+          type: string
+          description: Category PDT.
+          example: PDTPO
+        weightUom:
+          type: string
+          description: Category WUM.
+          example: WUMKG
+        dimensionUom:
+          type: string
+          description: Category DUM.
+          example: DUMCM
+        volumeUom:
+          type: string
+          description: Category VUM.
+          example: VUMCBM
+    ListResponsePlaceSuggestion:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlaceSuggestion"
+    PlaceSuggestion:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Amazon Location place id.
+        city:
+          type: string
+          example: Chicago
+        state:
+          type: string
+          example: IL
+        zipCode:
+          type: string
+          example: "60601"
+        country:
+          type: string
+          example: United States
+        countryCode:
+          type: string
+          example: US
+        label:
+          type: string
+          description: The full address line from Amazon Location.
+          example: "60601, Chicago, IL, United States"
+    Country:
+      type: object
+      properties:
+        countryCode:
+          type: string
+          description: ISO 3166-1 alpha-2.
+          example: US
+        countryName:
+          type: string
+          example: United States of America (the)
+        region:
+          type: string
+          description: "UN M49 region: Africa, Americas, Asia, Europe, Oceania, Antarctica."
+          example: Americas
+    ListResponseCountry:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Country"
+    CodeDetail:
+      type: object
+      properties:
+        cdcode:
+          type: string
+          description: Send this value back on a quote request.
+          example: PKTBOX
+        description:
+          type: string
+          description: Label to show the user.
+          example: BOX
+        sequence:
+          type: integer
+          format: int32
+          description: Display order. Null sorts last.
+          example: 20
+    CodeMaster:
+      type: object
+      properties:
+        cmcode:
+          type: string
+          example: PKT
+        description:
+          type: string
+          example: Package Type
+        codes:
+          type: array
+          description: "Active values, sorted by sequence then cdcode. May be empty."
+          items:
+            $ref: "#/components/schemas/CodeDetail"
+    ListResponseCodeMaster:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CodeMaster"
+    Airport:
+      type: object
+      properties:
+        iataCode:
+          type: string
+          description: Send this on a quote request as the port code.
+          example: ORD
+        icaoCode:
+          type: string
+          example: KORD
+        name:
+          type: string
+          example: Chicago O'Hare International Airport
+        municipality:
+          type: string
+          description: City the airport serves.
+          example: Chicago
+        isoRegion:
+          type: string
+          description: ISO 3166-2 subdivision.
+          example: US-IL
+        isoCountry:
+          type: string
+          description: ISO 3166-1 alpha-2.
+          example: US
+        latitude:
+          type: number
+          format: double
+          example: 41.9786
+        longitude:
+          type: number
+          format: double
+          example: -87.9048
+    ListResponseAirport:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Airport"

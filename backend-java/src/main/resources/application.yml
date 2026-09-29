@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: quote-extui-service
+  mail:
+    # Host, port, user name and password come from SPRING_MAIL_HOST, SPRING_MAIL_PORT,
+    # SPRING_MAIL_USERNAME and SPRING_MAIL_PASSWORD. Without a host, no email is sent.
+    properties:
+      "[mail.smtp.auth]": true
+      "[mail.smtp.starttls.enable]": true
+      # Amazon SES requires TLS. Only a local test mail server turns this off.
+      "[mail.smtp.starttls.required]": ${MAIL_STARTTLS_REQUIRED:true}
+      "[mail.smtp.connectiontimeout]": 10000
+      "[mail.smtp.timeout]": 10000
+      "[mail.smtp.writetimeout]": 10000
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?currentSchema=${DB_SCHEMA:quoteownr}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+      leak-detection-threshold: 30000
+      pool-name: quote-extui-service-pool
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+  compression:
+    enabled: true
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # metrics stays closed until authentication exists
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  # One JSON line per event, so CloudWatch keeps a stack trace in a single log event.
+  structured:
+    format:
+      console: ecs
+  level:
+    root: INFO
+    com.kwe.quote: ${LOG_LEVEL:INFO}
+
+quote:
+  location:
+    # Amazon Location Service API key for city and zip code suggestions.
+    api-key: ${LOCATION_API_KEY:}
+    region: ${AWS_REGION:us-east-1}
+  mail:
+    # Sender address, it must be verified in Amazon SES.
+    from: ${MAIL_FROM:}
+    # Internal addresses that get a summary of every quote request, comma separated.
+    internal-to: ${MAIL_INTERNAL_TO:}

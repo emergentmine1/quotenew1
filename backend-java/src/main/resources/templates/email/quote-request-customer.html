@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!-- Confirmation to the customer. Temporary content until the business provides the final template. -->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quote request received</title>
+</head>
+<body style="margin:0;padding:24px;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#172b4d;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;">
+    <tr>
+      <td style="padding:24px 28px;background:#0b2545;color:#ffffff;border-radius:8px 8px 0 0;">
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;">KWE Instant Quote</div>
+        <div style="font-size:22px;font-weight:bold;margin-top:6px;">We received your quote request</div>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 28px;font-size:14px;line-height:1.5;">
+        <p style="margin:0 0 12px;" th:text="|Dear ${quote.fullName},|">Dear Customer,</p>
+        <p style="margin:0 0 12px;">Thank you for your quote request. Our team will review your shipment details and contact you by email.</p>
+        <p style="margin:0 0 20px;">Your reference is <strong th:text="${quote.reference}">QR-2026-000001</strong>. Please quote it when you contact us.</p>
+
+        <table role="presentation" width="100%" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-size:14px;">
+          <tr><td style="color:#6b778c;width:45%;">From</td><td th:text="${quote.origin}">ORD</td></tr>
+          <tr th:if="${quote.pickupAddress}"><td style="color:#6b778c;">Pickup address</td><td th:text="${quote.pickupAddress}"></td></tr>
+          <tr><td style="color:#6b778c;">To</td><td th:text="${quote.destination}">HND</td></tr>
+          <tr th:if="${quote.deliveryAddress}"><td style="color:#6b778c;">Delivery address</td><td th:text="${quote.deliveryAddress}"></td></tr>
+          <tr><td style="color:#6b778c;">Shipping mode</td><td th:text="${quote.mode}">Air</td></tr>
+          <tr th:if="${quote.readyDate}"><td style="color:#6b778c;">Goods ready date</td><td th:text="${quote.readyDate}"></td></tr>
+          <tr th:if="${quote.deliveryDate}"><td style="color:#6b778c;">Required delivery date</td><td th:text="${quote.deliveryDate}"></td></tr>
+          <tr th:if="${quote.totalGrossWeight}"><td style="color:#6b778c;">Total gross weight</td><td th:text="${quote.totalGrossWeight}"></td></tr>
+          <tr th:if="${quote.totalVolume}"><td style="color:#6b778c;">Total volume</td><td th:text="${quote.totalVolume}"></td></tr>
+          <tr th:if="${!#lists.isEmpty(quote.services)}"><td style="color:#6b778c;">Additional services</td><td th:text="${#strings.listJoin(quote.services, ', ')}"></td></tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:16px 28px;font-size:12px;color:#6b778c;border-top:1px solid #dfe1e6;">
+        This is an automated message. Please do not reply to this email.
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

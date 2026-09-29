@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!-- Summary for the internal KWE team. Shows everything saved with the quote request. Temporary layout. -->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>New quote request</title>
+</head>
+<body style="margin:0;padding:24px;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#172b4d;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:720px;margin:0 auto;background:#ffffff;border-radius:8px;">
+    <tr>
+      <td style="padding:20px 28px;background:#0b2545;color:#ffffff;border-radius:8px 8px 0 0;">
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;">KWE Instant Quote</div>
+        <div style="font-size:20px;font-weight:bold;margin-top:6px;">
+          New quote request <span th:text="${quote.reference}">QR-2026-000001</span>
+        </div>
+        <div style="font-size:13px;margin-top:4px;">
+          <span th:text="${quote.fullName}">Name</span> (<span th:text="${quote.companyName}">Company</span>)
+          requests <span th:text="${quote.mode}">Air</span> from <span th:text="${quote.origin}">ORD</span>
+          to <span th:text="${quote.destination}">HND</span>.
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:20px 28px;font-size:13px;line-height:1.5;">
+
+        <h3 style="margin:0 0 8px;font-size:15px;">Customer</h3>
+        <table role="presentation" width="100%" cellpadding="5" cellspacing="0" style="border-collapse:collapse;margin-bottom:18px;">
+          <tr><td style="color:#6b778c;width:35%;">Full name</td><td th:text="${quote.fullName}"></td></tr>
+          <tr><td style="color:#6b778c;">Company</td><td th:text="${quote.companyName}"></td></tr>
+          <tr><td style="color:#6b778c;">Email</td><td th:text="${quote.email}"></td></tr>
+          <tr><td style="color:#6b778c;">Phone</td><td th:text="${quote.phone} ?: 'Not provided'"></td></tr>
+          <tr><td style="color:#6b778c;">Job title</td><td th:text="${quote.jobTitle} ?: 'Not provided'"></td></tr>
+          <tr><td style="color:#6b778c;">Address</td><td th:text="${quote.address} ?: 'Not provided'"></td></tr>
+          <tr><td style="color:#6b778c;">Country</td><td th:text="${quote.country} ?: 'Not provided'"></td></tr>
+          <tr><td style="color:#6b778c;">Commercial customer of KWE</td><td th:text="${quote.commercialCustomer}"></td></tr>
+          <tr><td style="color:#6b778c;">Consents to KWE emails</td><td th:text="${quote.emailConsent}"></td></tr>
+        </table>
+
+        <h3 style="margin:0 0 8px;font-size:15px;">Shipment</h3>
+        <table role="presentation" width="100%" cellpadding="5" cellspacing="0" style="border-collapse:collapse;margin-bottom:18px;">
+          <tr><td style="color:#6b778c;width:35%;">Shipping mode</td><td th:text="${quote.mode}"></td></tr>
+          <tr><td style="color:#6b778c;">Cargo type</td><td th:text="${quote.cargoType}"></td></tr>
+          <tr><td style="color:#6b778c;">Entered as</td><td th:text="${quote.ratingType}"></td></tr>
+          <tr><td style="color:#6b778c;">Origin</td><td th:text="${quote.origin} + ' (' + ${quote.pickupType} + ')'"></td></tr>
+          <tr th:if="${quote.pickupAddress}"><td style="color:#6b778c;">Pickup address</td><td th:text="${quote.pickupAddress}"></td></tr>
+          <tr><td style="color:#6b778c;">Destination</td><td th:text="${quote.destination} + ' (' + ${quote.deliveryType} + ')'"></td></tr>
+          <tr th:if="${quote.deliveryAddress}"><td style="color:#6b778c;">Delivery address</td><td th:text="${quote.deliveryAddress}"></td></tr>
+          <tr><td style="color:#6b778c;">Goods ready date</td><td th:text="${quote.readyDate} ?: 'Not provided'"></td></tr>
+          <tr><td style="color:#6b778c;">Required delivery date</td><td th:text="${quote.deliveryDate} ?: 'Not provided'"></td></tr>
+          <tr><td style="color:#6b778c;">Total gross weight</td><td th:text="${quote.totalGrossWeight} ?: 'Not provided'"></td></tr>
+          <tr><td style="color:#6b778c;">Total volume</td><td th:text="${quote.totalVolume} ?: 'Not provided'"></td></tr>
+          <tr><td style="color:#6b778c;">Total chargeable weight</td><td th:text="${quote.totalChargeableWeight} ?: 'Not provided'"></td></tr>
+          <tr><td style="color:#6b778c;">Additional services</td>
+              <td th:text="${#lists.isEmpty(quote.services)} ? 'None' : ${#strings.listJoin(quote.services, ', ')}"></td></tr>
+        </table>
+
+        <h3 style="margin:0 0 8px;font-size:15px;">Cargo lines</h3>
+        <table role="presentation" width="100%" cellpadding="5" cellspacing="0" style="border-collapse:collapse;font-size:12px;">
+          <tr style="background:#f4f5f7;text-align:left;">
+            <th>#</th><th>Commodity</th><th>Qty</th><th>Package</th><th>Gross weight</th><th>Dimensions (L x W x H)</th><th>Stackable</th><th>Hazardous</th>
+          </tr>
+          <tr th:each="item, row : ${quote.lineItems}" style="border-top:1px solid #dfe1e6;">
+            <td th:text="${row.count}">1</td>
+            <td th:text="${item.commodity}"></td>
+            <td th:text="${item.quantity}"></td>
+            <td th:text="${item.packageType} ?: 'N/A'"></td>
+            <td th:text="${item.grossWeight} ?: 'N/A'"></td>
+            <td th:text="${item.dimensions} ?: 'N/A'"></td>
+            <td th:text="${item.stackable} ?: 'N/A'"></td>
+            <td th:text="${item.hazardous} ?: 'N/A'"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:14px 28px;font-size:12px;color:#6b778c;border-top:1px solid #dfe1e6;">
+        Submitted <span th:text="${quote.submittedAt}"></span>. Reply to this email to contact the customer.
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

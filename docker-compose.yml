@@ -1,0 +1,65 @@
+# Runs the Instant Quote stack against the shared development database.
+#
+# Before the first run:
+#   cp backend-java/.env.example backend-java/.env    and fill it in
+#   cd backend-java && ./mvnw clean package           the image copies the jar
+#
+# Then:
+#   docker compose up -d --build
+#   curl localhost:8080/ping
+#   open http://localhost:3000/instant-quote, and http://localhost:8025 for the emails it sends
+#
+# The database is not part of this file. It is an existing AWS Aurora cluster
+# and both the build and the running container connect to it.
+
+services:
+  quote-extui-service:
+    container_name: quote-extui-service
+    build:
+      context: ./backend-java
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./backend-java/.env
+    environment:
+      # Local emails go to Mailpit, never to real inboxes. Read them at http://localhost:8025.
+      # In AWS these point to Amazon SES instead.
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_USERNAME: local
+      SPRING_MAIL_PASSWORD: local
+      MAIL_STARTTLS_REQUIRED: "false"
+      MAIL_FROM: instant-quote@example.com
+      MAIL_INTERNAL_TO: internal-team@example.com
+      # Amazon Location API key for city and zip code suggestions. Put LOCATION_API_KEY=... in
+      # a .env file next to this file (git ignores it). Without it the field accepts free text.
+      LOCATION_API_KEY: ${LOCATION_API_KEY:-}
+      AWS_REGION: us-east-1
+    depends_on:
+      - mailpit
+    restart: unless-stopped
+
+  mailpit:
+    container_name: quote-mailpit
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    restart: unless-stopped
+
+  quote-extui:
+    container_name: quote-extui
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:8080"
+    environment:
+      # The browser never calls the backend. Only the Next.js server does, over the compose network.
+      BACKEND_URL: http://quote-extui-service:8080
+    depends_on:
+      - quote-extui-service
+    restart: unless-stopped

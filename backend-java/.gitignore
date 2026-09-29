@@ -1,0 +1,4 @@
+target/
+
+# Owner chose not to version control tests.
+src/test/
