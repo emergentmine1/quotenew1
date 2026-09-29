@@ -31,11 +31,18 @@ Verified every repository/DTO/mapper column against the schema:
   category map TPM/CGT/RTT/PKT/ACS/PDT) all consistent. ✓
 => No code mismatches. Integration for the two in-scope flows was already implemented and is correct.
 
-## Deliverable
-- `backend-java/db/seed_masterdata.sql` — idempotent seed for the md_codemaster/md_codedetail rows
-  the form defaults + submit validator hard-depend on (categories TPM,CGT,RTT,PDT,WUM,DUM,VUM,PKT,ACS
-  and their required cdcodes). This is the real functional prerequisite; the dump had no row data so
-  it can't be confirmed present in the user's DB.
+## Master-data verified against real rows (2026-06, quote_dev_md_data.json + quote_dev_table_test_data.json)
+- md_codemaster: all 15 categories present, incl. the 9 the app needs (TPM,CGT,RTT,PDT,WUM,DUM,VUM,PKT,ACS). ✓
+- md_codedetail: all required cdcodes present AND active — TPMA, CGTPNP, RTTPU, RTTTS, PDTPO, PDTDO,
+  WUMKG, DUMCM, VUMCBM, PKTBOX, ACSOCC, ACSDCC, ACSINS. Nothing missing. ✓
+- => The master-data lookups + submit flows are fully satisfied by existing data. NO code changes needed.
+- Still unverified: md_airports / md_countries row counts (data not supplied in these files).
+
+## Deliverables
+- `backend-java/db/seed_masterdata.sql` — idempotent seed (confirmed NOT needed for the current DB;
+  kept as a safety-net for spinning up fresh environments).
+- `backend-java/db/verify_env.sql` — one-shot check: required codes present/active + md_airports /
+  md_countries non-empty + ORD default airport resolves. Run this in any env to confirm readiness.
 
 ## Out of scope / dead code (left untouched)
 - Live pricing/results view: `views/InstantQuoteResults.jsx`, `views/NoRateFound.jsx`,
