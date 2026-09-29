@@ -24,14 +24,18 @@ export default function SearchInput({
   testId,
   className,
   maxLength,
+  committedValue = '',
 }) {
   const [isOpen, setIsOpen] = useState(false);
   // `query` records which text these results belong to, so older answers are never shown.
   const [result, setResult] = useState({ query: '', items: [], failed: false });
   const query = (value || '').trim();
+  // When the box still shows a previously chosen item's label (e.g. "ORD - Chicago"), that label
+  // is not a search term, so we must not search it or show a "No matches" message for it.
+  const showsCommitted = query.length >= MIN_QUERY_LENGTH && query === String(committedValue || '').trim();
 
   useEffect(() => {
-    if (!isOpen || query.length < MIN_QUERY_LENGTH) return undefined;
+    if (!isOpen || query.length < MIN_QUERY_LENGTH || showsCommitted) return undefined;
 
     let isLatest = true;
     const timer = setTimeout(async () => {
@@ -43,7 +47,7 @@ export default function SearchInput({
       isLatest = false;
       clearTimeout(timer);
     };
-  }, [isOpen, query, search]);
+  }, [isOpen, query, search, showsCommitted]);
 
   const isLoading = result.query !== query;
   const items = isLoading ? [] : result.items;
@@ -54,7 +58,7 @@ export default function SearchInput({
     setIsOpen(false);
   };
 
-  const showList = isOpen && query.length >= MIN_QUERY_LENGTH;
+  const showList = isOpen && query.length >= MIN_QUERY_LENGTH && !showsCommitted;
 
   return (
     <div className={cn('relative', className)}>
@@ -65,7 +69,11 @@ export default function SearchInput({
           onChange?.(event.target.value);
           setIsOpen(true);
         }}
-        onFocus={() => setIsOpen(true)}
+        // Select the chosen label on focus so the first keystroke replaces it and a new search starts.
+        onFocus={(event) => {
+          setIsOpen(true);
+          if (showsCommitted) event.target.select();
+        }}
         // Close after a short delay so a click on a suggestion still registers.
         onBlur={() => setTimeout(() => setIsOpen(false), 120)}
         placeholder={placeholder}

@@ -998,6 +998,8 @@ function LocationCard({ title, type, setType, locationTypes, location, setLocati
         <AirportPicker
           testId={`${prefix}-port-select`}
           value={location.search}
+          // Once an airport is chosen, its label is a committed value, not a search term.
+          committedValue={location.code ? location.search : ''}
           // Typing clears the chosen airport until a suggestion is picked.
           onChange={(text) => setLocation({ ...location, search: text, code: '', city: '', country: '', countryCode: '' })}
           onSelect={(airport) => setLocation({

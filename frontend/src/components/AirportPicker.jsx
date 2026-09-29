@@ -16,6 +16,7 @@ export default function AirportPicker({
   excludeCode,
   placeholder,
   testId,
+  committedValue,
 }) {
   const search = useCallback(
     async (text) => {
@@ -32,6 +33,7 @@ export default function AirportPicker({
       onChange={onChange}
       onSelect={onSelect}
       search={search}
+      committedValue={committedValue}
       getKey={(airport) => airport.iataCode}
       getLabel={formatAirport}
       renderItem={(airport) => (
