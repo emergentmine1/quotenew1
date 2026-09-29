@@ -1,0 +1,346 @@
+{
+"SELECT\r\n    cm.cmcode,\r\n    cm.cmdescription,\r\n    cd.cdcode,\r\n    cd.cddescription,\r\n    cd.sequence\r\nFROM md_codemaster cm\r\nJOIN md_codedetail cd\r\n    ON cm.cmcode = cd.cmcode\r\nORDER BY cm.cmcode, cd.sequence": [
+	{
+		"cmcode" : "ACS",
+		"cmdescription" : "Accessorial Service",
+		"cdcode" : "ACSINS",
+		"cddescription" : "Cargo Insurance",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "ACS",
+		"cmdescription" : "Accessorial Service",
+		"cdcode" : "ACSOCC",
+		"cddescription" : "Origin Customs Clearance",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "ACS",
+		"cmdescription" : "Accessorial Service",
+		"cdcode" : "ACSDCC",
+		"cddescription" : "Destination Customs Clearance",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "APT",
+		"cmdescription" : "Airport Type",
+		"cdcode" : "APTLRG",
+		"cddescription" : "Large Airport",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "APT",
+		"cmdescription" : "Airport Type",
+		"cdcode" : "APTMED",
+		"cddescription" : "Medium Airport",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "APT",
+		"cmdescription" : "Airport Type",
+		"cdcode" : "APTSML",
+		"cddescription" : "Small Airport",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "APT",
+		"cmdescription" : "Airport Type",
+		"cdcode" : "APTHEL",
+		"cddescription" : "Heliport",
+		"sequence" : 40
+	},
+	{
+		"cmcode" : "APT",
+		"cmdescription" : "Airport Type",
+		"cdcode" : "APTSPB",
+		"cddescription" : "Seaplane Base",
+		"sequence" : 50
+	},
+	{
+		"cmcode" : "ASV",
+		"cmdescription" : "Air Service Type",
+		"cdcode" : "ASVEXP",
+		"cddescription" : "Express",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "ASV",
+		"cmdescription" : "Air Service Type",
+		"cdcode" : "ASVSTD",
+		"cddescription" : "Standard",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "ASV",
+		"cmdescription" : "Air Service Type",
+		"cdcode" : "ASVECN",
+		"cddescription" : "Economy",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "CGT",
+		"cmdescription" : "Cargo Type",
+		"cdcode" : "CGTPNP",
+		"cddescription" : "Packages & Pallets",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "CLM",
+		"cmdescription" : "Calculation Method",
+		"cdcode" : "CLMFLT",
+		"cddescription" : "Flat Amount",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "CLM",
+		"cmdescription" : "Calculation Method",
+		"cdcode" : "CLMCWR",
+		"cddescription" : "Chargeable Wt X Rate Per Unit (KG)",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "CLM",
+		"cmdescription" : "Calculation Method",
+		"cdcode" : "CLMFCW",
+		"cddescription" : "Flat Amount + Chargeable Wt X Rate Per Unit (KG)",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "DUM",
+		"cmdescription" : "Dimension UOM",
+		"cdcode" : "DUMCM",
+		"cddescription" : "Centimetres",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "DUM",
+		"cmdescription" : "Dimension UOM",
+		"cdcode" : "DUMIN",
+		"cddescription" : "Inches",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "DUM",
+		"cmdescription" : "Dimension UOM",
+		"cdcode" : "DUMFT",
+		"cddescription" : "Feet",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "DUM",
+		"cmdescription" : "Dimension UOM",
+		"cdcode" : "DUMM",
+		"cddescription" : "Metres",
+		"sequence" : 40
+	},
+	{
+		"cmcode" : "OSV",
+		"cmdescription" : "Ocean Service Type",
+		"cdcode" : "OSVEXP",
+		"cddescription" : "Express",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "OSV",
+		"cmdescription" : "Ocean Service Type",
+		"cdcode" : "OSVSTD",
+		"cddescription" : "Standard",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "OSV",
+		"cmdescription" : "Ocean Service Type",
+		"cdcode" : "OSVECN",
+		"cddescription" : "Economy",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "PDT",
+		"cmdescription" : "Pickup Delivery Type",
+		"cdcode" : "PDTPO",
+		"cddescription" : "Port",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "PDT",
+		"cmdescription" : "Pickup Delivery Type",
+		"cdcode" : "PDTDO",
+		"cddescription" : "Door",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "PKT",
+		"cmdescription" : "Package Type",
+		"cdcode" : "PKTPLT",
+		"cddescription" : "PALLET",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "PKT",
+		"cmdescription" : "Package Type",
+		"cdcode" : "PKTBOX",
+		"cddescription" : "BOX",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "PKT",
+		"cmdescription" : "Package Type",
+		"cdcode" : "PKTCRT",
+		"cddescription" : "CRATE",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "RQS",
+		"cmdescription" : "Request Status",
+		"cdcode" : "RQSNEW",
+		"cddescription" : "New",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "RQS",
+		"cmdescription" : "Request Status",
+		"cdcode" : "RQSCON",
+		"cddescription" : "Contacted",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "RQS",
+		"cmdescription" : "Request Status",
+		"cdcode" : "RQSWON",
+		"cddescription" : "Won",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "RQS",
+		"cmdescription" : "Request Status",
+		"cdcode" : "RQSLOS",
+		"cddescription" : "Lost",
+		"sequence" : 40
+	},
+	{
+		"cmcode" : "RQS",
+		"cmdescription" : "Request Status",
+		"cdcode" : "RQSCLS",
+		"cddescription" : "Close",
+		"sequence" : 50
+	},
+	{
+		"cmcode" : "RTT",
+		"cmdescription" : "Rating Type",
+		"cdcode" : "RTTPU",
+		"cddescription" : "Per Unit",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "RTT",
+		"cmdescription" : "Rating Type",
+		"cdcode" : "RTTTS",
+		"cddescription" : "Total Shipment",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "STA",
+		"cmdescription" : "Quote Status",
+		"cdcode" : "STAO",
+		"cddescription" : "Offered",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "STA",
+		"cmdescription" : "Quote Status",
+		"cdcode" : "STAB",
+		"cddescription" : "Booked",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "STA",
+		"cmdescription" : "Quote Status",
+		"cdcode" : "STAC",
+		"cddescription" : "Confirmed",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "TPM",
+		"cmdescription" : "Transport Mode",
+		"cdcode" : "TPMA",
+		"cddescription" : "Air",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "TPM",
+		"cmdescription" : "Transport Mode",
+		"cdcode" : "TPMO",
+		"cddescription" : "Ocean",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "VUM",
+		"cmdescription" : "Volume UOM",
+		"cdcode" : "VUMCBM",
+		"cddescription" : "Cubic Meters",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "VUM",
+		"cmdescription" : "Volume UOM",
+		"cdcode" : "VUMCC",
+		"cddescription" : "Cubic Centimeters",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "VUM",
+		"cmdescription" : "Volume UOM",
+		"cdcode" : "VUMCFT",
+		"cddescription" : "Cubic Feet",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "VUM",
+		"cmdescription" : "Volume UOM",
+		"cdcode" : "VUMCIN",
+		"cddescription" : "Cubic Inches",
+		"sequence" : 40
+	},
+	{
+		"cmcode" : "WUM",
+		"cmdescription" : "Weight UOM",
+		"cdcode" : "WUMKG",
+		"cddescription" : "Kilograms",
+		"sequence" : 10
+	},
+	{
+		"cmcode" : "WUM",
+		"cmdescription" : "Weight UOM",
+		"cdcode" : "WUMLB",
+		"cddescription" : "Pounds",
+		"sequence" : 20
+	},
+	{
+		"cmcode" : "WUM",
+		"cmdescription" : "Weight UOM",
+		"cdcode" : "WUMG",
+		"cddescription" : "Grams",
+		"sequence" : 30
+	},
+	{
+		"cmcode" : "WUM",
+		"cmdescription" : "Weight UOM",
+		"cdcode" : "WUMMT",
+		"cddescription" : "Metric Ton",
+		"sequence" : 40
+	},
+	{
+		"cmcode" : "WUM",
+		"cmdescription" : "Weight UOM",
+		"cdcode" : "WUMST",
+		"cddescription" : "Short Ton",
+		"sequence" : 50
+	},
+	{
+		"cmcode" : "WUM",
+		"cmdescription" : "Weight UOM",
+		"cdcode" : "WUMCBM",
+		"cddescription" : "Cubic Meters",
+		"sequence" : 60
+	}
+]}

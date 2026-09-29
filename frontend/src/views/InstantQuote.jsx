@@ -86,9 +86,9 @@ function titleCase(text) {
   return String(text || '').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function newUnit(packageType) {
+function newUnit(packageType, id) {
   return {
-    id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36),
+    id,
     packageType,
     commodity: '',
     units: 1,
@@ -99,6 +99,12 @@ function newUnit(packageType) {
     hazardous: false,
   };
 }
+
+// Unit ids: a fixed id for the first unit so server and client render identically (no hydration
+// mismatch), and a random id for units added later (only ever created in a client event handler).
+const FIRST_UNIT_ID = 'unit-1';
+const makeUnitId = () =>
+  typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `u-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
 
 function unitCFT(u, dimUnit) {
   const factor = dimUnit === 'CM' ? 1 / 2.54 : 1;
@@ -179,7 +185,7 @@ export default function InstantQuote({ options }) {
   const [calcMode, setCalcMode] = useState(defaults.ratingType);
   const [dimUnit, setDimUnit] = useState(defaultDimUnit);
   const [weightUnit, setWeightUnit] = useState(defaultWeightUnit);
-  const [units, setUnits] = useState(() => [newUnit(defaultPackageType)]);
+  const [units, setUnits] = useState(() => [newUnit(defaultPackageType, FIRST_UNIT_ID)]);
   const [totalShipment, setTotalShipment] = useState({ volume: 0, weight: 0, commodity: '' });
 
   // Step 2
@@ -194,9 +200,19 @@ export default function InstantQuote({ options }) {
     countryCode: 'US',
   });
   const [destination, setDestination] = useState(EMPTY_LOCATION);
-  const todayDate = toISODate(new Date());
-  const [readyDate, setReadyDate] = useState(() => addDaysISO(todayDate, 7));
+  // Dates depend on the runtime clock and timezone. Computing them during render would differ
+  // between the server (UTC) and the browser (local zone) and break hydration, which in turn
+  // drops the event handlers on this step (airport pickers, date fields). So they start empty and
+  // are filled in once, on the client, after mount.
+  const [todayDate, setTodayDate] = useState('');
+  const [readyDate, setReadyDate] = useState('');
   const [requiredDeliveryDate, setRequiredDeliveryDate] = useState('');
+
+  useEffect(() => {
+    const today = toISODate(new Date());
+    setTodayDate(today);
+    setReadyDate((current) => current || addDaysISO(today, 7));
+  }, []);
   const [originType, setOriginType] = useState(defaults.pickupType);
   const [destinationType, setDestinationType] = useState(defaults.deliveryType);
 
@@ -562,7 +578,7 @@ export default function InstantQuote({ options }) {
                 units={units}
                 onUnitChange={updateUnit}
                 onUnitRemove={removeUnit}
-                onAddUnit={() => setUnits((arr) => [...arr, newUnit(defaultPackageType)])}
+                onAddUnit={() => setUnits((arr) => [...arr, newUnit(defaultPackageType, makeUnitId())])}
                 packageTypeOptions={packageTypeOptions}
                 totalShipment={totalShipment}
                 onTotalShipmentChange={setTotalShipment}
