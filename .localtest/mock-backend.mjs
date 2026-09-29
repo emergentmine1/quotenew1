@@ -75,6 +75,7 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify(obj));
   };
   const p = u.pathname;
+  console.log(new Date().toISOString(), req.method, p, u.search);
   if (p === '/ping') return send({ status: 'UP' });
   if (p === '/api/v1/profiledata/defaults') return send(DEFAULTS);
   if (p === '/api/v1/masterdata/codes') return send(codes(u.searchParams.get('cmcode')));
