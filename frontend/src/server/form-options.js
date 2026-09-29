@@ -11,6 +11,8 @@ const CATEGORIES = {
   packageTypes: 'PKT',
   services: 'ACS',
   locationTypes: 'PDT',
+  weightUoms: 'WUM',
+  dimensionUoms: 'DUM',
 };
 
 let cached = null;

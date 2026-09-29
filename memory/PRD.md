@@ -59,8 +59,17 @@ Verified every repository/DTO/mapper column against the schema:
 Could not build/run the Java backend against Postgres/Aurora in this environment (no DB, and the
 user opted to run in their own env). Reconciliation is static, against the provided schema.
 
+## Changes made (2026-06)
+- Dimension (IN/CM) and Weight (KG/LB) toggles are now data-driven from the backend DUM / WUM
+  categories instead of hardcoded arrays:
+  - `server/form-options.js`: fetch adds `weightUoms: 'WUM'`, `dimensionUoms: 'DUM'`.
+  - `views/InstantQuote.jsx`: `DIM_UNIT_UI` / `WEIGHT_UNIT_UI` allow-lists (cdcode -> symbol),
+    `dimUnitOptions` / `weightUnitOptions` memos, and toggle defaults now follow the backend
+    default UOM (`defaults.dimensionUom` DUMCM -> CM, `defaults.weightUom` WUMKG -> KG). This
+    changed the visible dimension default from IN to CM (matches the DB default).
+  - `components/UnitForm.jsx`: `UnitToggle` options come from the new props, no literal arrays.
+  - Submit unchanged: values are still normalised to metric and sent with the DB UOM codes.
+  - Allow-list keeps only engine-supported units (CM/IN, KG/LB); extra DB codes (FT, M, G, MT, ST,
+    CBM-under-WUM) are intentionally not shown since the conversion math does not support them.
+
 ## Backlog / next
-- P1: Wire live pricing (tx_quote, tx_quotepricingelements, pf_ratebook*, pf_tactrates, md_pricingelements,
-  md_currencies) and replace the mock results view.
-- P2: Remove dead pricing/mock frontend files.
-- P2: Optional local docker Postgres harness to run the stack end-to-end.

@@ -48,6 +48,12 @@ const CARGO_UI = {
   CGTPNP: { icon: Boxes, description: 'Per-unit dimensions and weight', testId: 'iq-cargo-packages' },
 };
 
+// The dimension and weight toggles show only the units the conversion logic supports.
+// The option set and the default come from the backend DUM / WUM categories; the value here is
+// the short symbol used for display and by the CM/IN and KG/LB conversion math.
+const DIM_UNIT_UI = { DUMIN: 'IN', DUMCM: 'CM' };
+const WEIGHT_UNIT_UI = { WUMKG: 'KG', WUMLB: 'LB' };
+
 const SERVICE_UI = {
   ACSOCC: {
     icon: FileCheck,
@@ -151,15 +157,28 @@ export default function InstantQuote({ options }) {
     () => options.locationTypes.map((type) => ({ code: type.code, label: LOCATION_TYPE_LABELS[type.code] || type.name })),
     [options.locationTypes]
   );
+  // Toggle options built from the backend DUM / WUM lists, restricted to the units the
+  // conversion math supports, ordered as the backend returns them (by sequence).
+  const dimUnitOptions = useMemo(
+    () => (options.dimensionUoms || []).filter((u) => DIM_UNIT_UI[u.code]).map((u) => DIM_UNIT_UI[u.code]),
+    [options.dimensionUoms]
+  );
+  const weightUnitOptions = useMemo(
+    () => (options.weightUoms || []).filter((u) => WEIGHT_UNIT_UI[u.code]).map((u) => WEIGHT_UNIT_UI[u.code]),
+    [options.weightUoms]
+  );
   const defaultPackageType = packageTypeOptions.some((type) => type.code === DEFAULT_PACKAGE_TYPE)
     ? DEFAULT_PACKAGE_TYPE
     : packageTypeOptions[0]?.code;
+  // Default the toggles to the backend's default UOM (DUMCM -> CM, WUMKG -> KG).
+  const defaultDimUnit = DIM_UNIT_UI[defaults.dimensionUom] || dimUnitOptions[0] || 'CM';
+  const defaultWeightUnit = WEIGHT_UNIT_UI[defaults.weightUom] || weightUnitOptions[0] || 'KG';
 
   // Step 1
   const [cargoType, setCargoType] = useState(defaults.cargoType);
   const [calcMode, setCalcMode] = useState(defaults.ratingType);
-  const [dimUnit, setDimUnit] = useState('IN');
-  const [weightUnit, setWeightUnit] = useState('KG');
+  const [dimUnit, setDimUnit] = useState(defaultDimUnit);
+  const [weightUnit, setWeightUnit] = useState(defaultWeightUnit);
   const [units, setUnits] = useState(() => [newUnit(defaultPackageType)]);
   const [totalShipment, setTotalShipment] = useState({ volume: 0, weight: 0, commodity: '' });
 
@@ -538,6 +557,8 @@ export default function InstantQuote({ options }) {
                 weightUnit={weightUnit}
                 onDimUnitChange={setDimUnit}
                 onWeightUnitChange={setWeightUnit}
+                dimUnitOptions={dimUnitOptions}
+                weightUnitOptions={weightUnitOptions}
                 units={units}
                 onUnitChange={updateUnit}
                 onUnitRemove={removeUnit}

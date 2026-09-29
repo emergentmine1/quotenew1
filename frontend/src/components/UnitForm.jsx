@@ -93,6 +93,8 @@ export default function UnitForm({
   weightUnit,
   onDimUnitChange,
   onWeightUnitChange,
+  dimUnitOptions,
+  weightUnitOptions,
   units,
   onUnitChange,
   onUnitRemove,
@@ -115,9 +117,9 @@ export default function UnitForm({
 
       <div className="flex flex-wrap items-center gap-3 text-xs">
         <span className="font-semibold uppercase tracking-widest text-slate-500">Dimensions</span>
-        <UnitToggle value={dimUnit} onChange={onDimUnitChange} options={['IN', 'CM']} testId="iq-dim-unit" />
+        <UnitToggle value={dimUnit} onChange={onDimUnitChange} options={dimUnitOptions} testId="iq-dim-unit" />
         <span className="ml-2 font-semibold uppercase tracking-widest text-slate-500">Weight</span>
-        <UnitToggle value={weightUnit} onChange={onWeightUnitChange} options={['KG', 'LB']} testId="iq-weight-unit" />
+        <UnitToggle value={weightUnit} onChange={onWeightUnitChange} options={weightUnitOptions} testId="iq-weight-unit" />
       </div>
 
       {calcMode === RATING_PER_UNIT ? (
